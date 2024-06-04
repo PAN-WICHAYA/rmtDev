@@ -1,4 +1,4 @@
-export default function SearchForm({ searchText, setSearchText }) {
+export default function SearchForm({ searchText, onSearchTextChange }) {
   return (
     <form onSubmit={(e) => e.preventDefault()} action="#" className="search">
       <button type="submit">
@@ -7,7 +7,7 @@ export default function SearchForm({ searchText, setSearchText }) {
 
       <input
         value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
+        onChange={(e) => onSearchTextChange(e.target.value)}
         spellCheck="false"
         type="text"
         required
