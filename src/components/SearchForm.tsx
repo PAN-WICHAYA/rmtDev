@@ -1,4 +1,11 @@
-export default function SearchForm({ searchText, onSearchTextChange }) {
+type SearchFormProps = {
+  searchText: string;
+  onSearchTextChange: React.Dispatch<React.SetStateAction<string>>;
+};
+export default function SearchForm({
+  searchText,
+  onSearchTextChange,
+}: SearchFormProps) {
   return (
     <form onSubmit={(e) => e.preventDefault()} action="#" className="search">
       <button type="submit">
