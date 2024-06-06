@@ -57,7 +57,7 @@ export function useJobItem(id: number | null) {
   return [jobItem, isLoading] as const;
 }
 
-export function useDebounce(value, delay) {
+export function useDebounce<T>(value: T, delay = 500): T {
   const [debounceValue, setDebounceValue] = useState(value);
   useEffect(() => {
     const timerId = setTimeout(() => setDebounceValue(value), delay);
