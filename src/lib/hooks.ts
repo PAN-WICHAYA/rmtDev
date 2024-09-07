@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { JobItem, JobItemExpanded } from './types';
 import { BASE_API_URL } from './constant';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { handleError } from './utils';
 import { BookmarksContext } from '../contexts/BookmarksContextProvider';
 
@@ -41,6 +41,26 @@ export function useJobItem(id: number | null) {
   return { jobItem: data?.jobItem, isLoading: isInitialLoading } as const;
 }
 
+export function useJobItems(ids: number[]) {
+  const results = useQueries({
+    queries: ids.map((id) => ({
+      queryKey: ['job-item', id],
+      queryFn: () => fetchJobItem(id),
+      staleTime: 1000 * 60 * 60,
+      refetchOnWindowFocus: false,
+      retry: false,
+      enabled: !!id,
+      onError: handleError,
+    })),
+  });
+  const jobItems = results
+    .map((result) => result.data?.jobItem)
+    .filter((jobItem) => jobItem !== undefined);
+
+  const isLoading = results.some((result) => result.isLoading);
+
+  return { jobItems, isLoading };
+}
 export function useDebounce<T>(value: T, delay = 500): T {
   const [debounceValue, setDebounceValue] = useState(value);
   useEffect(() => {
@@ -63,7 +83,7 @@ const fetchJobItems = async (
   return data;
 };
 
-export function useJobItems(searchText: string) {
+export function useSearchQuery(searchText: string) {
   const { data, isInitialLoading } = useQuery(
     ['job-items', searchText],
     () => fetchJobItems(searchText),
@@ -110,6 +130,27 @@ export function useLocalStorage<T>(
     localStorage.setItem(key, JSON.stringify(value));
   }, [value, key]);
   return [value, setValue] as const;
+}
+
+export function useOnClickOutside(
+  refs: React.RefObject<HTMLElement>[],
+  handler: () => void
+) {
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (
+        e.target instanceof HTMLElement &&
+        refs.every((ref) => !ref.current?.contains(e.target as Node))
+      ) {
+        handler();
+      }
+    };
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, [refs, handler]);
 }
 
 export function useBookmarksContext() {
